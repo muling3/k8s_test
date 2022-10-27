@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-dpl
+spec:
+  selector:
+    matchLabels:
+      app: mysql-dpl
+  template:
+    metadata:
+      labels:
+        app: mysql-dpl
+    spec:
+      containers:
+      - name: mysql-dpl
+        image: mysql:5
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: "512Mi"
+            cpu: "1500m"
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-svc
+spec:
+  selector:
+    app: mysql-dpl
+  ports:
+  - port: 3306
+    targetPort: 3306

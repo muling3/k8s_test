@@ -1,0 +1,36 @@
+services:
+  mysqldb:
+    container_name: mysqlcontainer
+    image: mysql:5
+    command: --default-authentication-plugin=mysql_native_password
+    restart: unless-stopped
+    volumes:
+      - ./main.sql:/docker-entrypoint-initdb.d/0_init.sql
+      - $HOME/Programming/node-practise/k8s-test/database:/var/lib/mysql
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_DATABASE=k8s_node
+    networks:
+      - internalnet
+
+  nodeapp:
+    container_name: k8snodeapp
+    build: ./
+    ports:
+      - 4000:4000
+    environment:
+      - DATABASE_NAME=k8s_node
+      - TABLE_NAME=test_table
+      - HOST=mysqldb
+      - DB_USER=root
+      - DB_PASSWORD=password
+    depends_on:
+      - mysqldb
+    networks:
+      - internalnet
+     
+networks:
+  internalnet:
+    driver: bridge

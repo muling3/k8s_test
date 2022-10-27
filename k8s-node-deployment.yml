@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-test-nodeapp
+spec:
+  selector:
+    matchLabels:
+      app: k8s-test-nodeapp
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: k8s-test-nodeapp
+    spec:
+      containers:
+      - name: k8s-test-nodeapp
+        image: k8s_node
+        imagePullPolicy: IfNotPresent
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "250m"
+        ports:
+        - containerPort: 4000
+        env:
+        - name: DATABASE_NAME
+          value: k8s_node
+        - name: TABLE_NAME
+          value: test_table
+        - name: HOST
+          value: mysql-svc
+        - name: DB_USER
+          value: root
+        - name: DB_PASSWORD
+          value: password
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-test-nodeapp
+spec:
+  selector:
+    app: k8s-test-nodeapp
+  ports:
+  - port: 4000
+    targetPort: 4000
+    # nodePort: 30200
+  type: NodePort
